@@ -1,0 +1,17 @@
+# Caddy terminates TLS and proxies to Next.js. It does not buffer responses, so streaming works.
+# Behind Cloudflare's proxy: set Cloudflare SSL mode to "Full (strict)".
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	reverse_proxy app:3000
+}
+
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}

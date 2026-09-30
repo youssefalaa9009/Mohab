@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+/* ───────────────────────────────────────────────────────────────────────────
+   QUATTRO design tokens
+   Palette is provisional until brand colours are supplied — change values here only.
+   Tailwind's default palette is removed on purpose: only these tokens exist.
+   ─────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-canvas: #f4f1ec; /* page background (bone) */
+  --color-surface: #fbfaf7; /* drawers, inputs, raised areas */
+  --color-ink: #111110; /* text, primary actions */
+  --color-ink-soft: #2b2a27; /* secondary UI */
+  --color-muted: #6b6862; /* metadata — 4.9:1 on canvas */
+  --color-line: #d9d4cb; /* decorative hairlines */
+  --color-line-strong: #8c877f; /* input borders — ≥3:1 non-text contrast */
+  --color-paper: #f4f1ec; /* text on dark surfaces */
+
+  --color-success: #2f5d3a;
+  --color-warning: #8a5a00;
+  --color-danger: #a4262c;
+
+  /* Placeholder tones (image stand-ins until photography arrives) */
+  --color-stone-1: #cfc8bc;
+  --color-stone-2: #a89f92;
+  --color-stone-3: #6e675d;
+  --color-stone-4: #3a3632;
+
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bodoni), ui-serif, Georgia, serif;
+
+  /* Type scale — fluid where it matters */
+  --text-display: clamp(3.5rem, 13vw, 12rem);
+  --text-display--line-height: 0.86;
+  --text-display--letter-spacing: -0.03em;
+  --text-h1: clamp(2.25rem, 5vw, 4.5rem);
+  --text-h1--line-height: 1;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: clamp(1.75rem, 3.5vw, 3rem);
+  --text-h2--line-height: 1.05;
+  --text-h2--letter-spacing: -0.015em;
+  --text-h3: 1.25rem;
+  --text-h3--line-height: 1.3;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+  --text-caption--letter-spacing: 0.08em;
+
+  --breakpoint-3xl: 120rem;
+
+  --radius-input: 2px;
+
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-quart: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@theme inline {
+  --spacing-gutter: var(--gutter);
+  --spacing-section: var(--section-space);
+  --spacing-header: var(--header-height);
+}
+
+:root {
+  --gutter: 1rem;
+  --section-space: clamp(4rem, 10vw, 10rem);
+  --header-height: 3.5rem;
+  --focus-ring: var(--color-ink);
+
+  @media (width >= 48rem) {
+    --gutter: 1.5rem;
+    --header-height: 4rem;
+  }
+  @media (width >= 64rem) {
+    --gutter: 2.5rem;
+  }
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    /* iOS 26+: lets Base UI backdrops cover the full visual viewport (see Base UI quick start) */
+    position: relative;
+    min-height: 100dvh;
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* Surfaces that flip to dark set their own ring colour */
+  [data-surface="dark"] {
+    --focus-ring: var(--color-paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ─── Layout utilities ──────────────────────────────────────────────────── */
+
+/* Base UI portals render above this stacking context */
+@utility app-root {
+  isolation: isolate;
+}
+
+@utility container-page {
+  width: 100%;
+  max-width: 120rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* The QUATTRO grid: 4 columns on mobile, 8 on tablet, 12 on desktop */
+@utility grid-page {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--gutter);
+
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+  @media (width >= 64rem) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+/* ─── Typography utilities ──────────────────────────────────────────────── */
+
+/* Uppercase label: nav items, buttons, badges, captions */
+@utility label-caps {
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  letter-spacing: var(--text-caption--letter-spacing);
+  text-transform: uppercase;
+  font-weight: 500;
+  font-variation-settings: "wdth" 88;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Animated underline for text links (transform-only, direction-aware) */
+@utility link-underline {
+  position: relative;
+  text-decoration: none;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -0.125em;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 400ms var(--ease-out-expo);
+  }
+  &:where([dir="rtl"], [dir="rtl"] *)::after {
+    transform-origin: left;
+  }
+  &:hover::after,
+  &:focus-visible::after,
+  &[aria-current="page"]::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  &:where([dir="rtl"], [dir="rtl"] *):hover::after,
+  &:where([dir="rtl"], [dir="rtl"] *):focus-visible::after {
+    transform-origin: right;
+  }
+}
+
+/* ─── Header behaviour (home hero docks the wordmark into the header) ───── */
+:root[data-hero-docked="false"] .header-logo:not(:focus-visible) {
+  opacity: 0;
+  pointer-events: none;
+}
