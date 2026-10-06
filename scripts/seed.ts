@@ -1,10 +1,11 @@
 /**
- * npm run db:seed            → (re)creates the demo catalog
+ * npm run db:seed            → (re)creates the example catalog and fetches missing photos
  * npm run db:seed -- --clean → removes all demo data (run before launch)
  */
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import * as schema from "../src/lib/db/schema";
+import * as schema from "../server/db/schema";
+import { ensureExampleMedia } from "./example-media";
 import { cleanDemo, seedDemo } from "./seed-demo";
 
 async function main() {
@@ -19,7 +20,8 @@ async function main() {
     console.log("✓ demo data removed");
   } else {
     await seedDemo(db);
-    console.log("✓ demo catalog seeded (12 products, flagged is_demo)");
+    console.log("✓ example catalog seeded (12 products, flagged is_demo)");
+    await ensureExampleMedia({ quiet: true });
   }
   await client.end();
 }

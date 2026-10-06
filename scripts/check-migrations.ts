@@ -3,9 +3,10 @@
  * then runs a few constraint smoke tests. Needs no database server — safe for CI.
  */
 import { PGlite } from "@electric-sql/pglite";
+import { pg_trgm } from "@electric-sql/pglite/contrib/pg_trgm";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
-import * as schema from "../src/lib/db/schema";
+import * as schema from "../server/db/schema";
 import { cleanDemo, seedDemo } from "./seed-demo";
 
 async function expectFailure(label: string, run: () => Promise<unknown>) {
@@ -19,7 +20,8 @@ async function expectFailure(label: string, run: () => Promise<unknown>) {
 }
 
 async function main() {
-  const client = new PGlite();
+  // Extensions the migrations enable must be loaded into PGlite explicitly.
+  const client = new PGlite({ extensions: { pg_trgm } });
   const db = drizzle(client);
   await migrate(db, { migrationsFolder: "./drizzle" });
 
@@ -36,7 +38,9 @@ async function main() {
   const product = "'00000000-0000-0000-0000-000000000002'";
 
   await expectFailure("negative stock", () =>
-    client.exec(`insert into variants (product_id, sku, price, stock) values (${product}, 'A', 100, -1)`),
+    client.exec(
+      `insert into variants (product_id, sku, price, stock) values (${product}, 'A', 100, -1)`,
+    ),
   );
   await expectFailure("compare-at price not above price", () =>
     client.exec(
@@ -65,7 +69,7 @@ async function main() {
   console.log("✓ schema checks passed");
 
   // Seed on a fresh database: twice (must be re-runnable), then clean.
-  const seedClient = new PGlite();
+  const seedClient = new PGlite({ extensions: { pg_trgm } });
   const seedDb = drizzle(seedClient, { schema, casing: "snake_case" });
   await migrate(seedDb, { migrationsFolder: "./drizzle" });
   await seedDemo(seedDb);
@@ -75,6 +79,19 @@ async function main() {
            (select count(*) from variants)::int as variants,
            (select count(*) from product_images)::int as images`);
   console.log(`✓ demo seed re-runnable — ${JSON.stringify(counts.rows[0])}`);
+  // A real product filed under a demo category keeps that category through a clean.
+  await seedClient.exec(`
+    insert into products (slug, name, category_id, is_demo)
+    select 'real-tee', 'Real Tee', id, false from categories where slug = 't-shirts'`);
+  await cleanDemo(seedDb);
+  const kept = await seedClient.query<{ n: number }>(
+    "select count(*)::int as n from categories where slug = 't-shirts'",
+  );
+  if (kept.rows[0]?.n !== 1) throw new Error("cleanDemo deleted a category a real product uses");
+  await seedDemo(seedDb); // must reuse the kept category, not collide with it
+  console.log("✓ demo clean keeps categories that real products use");
+  await seedClient.exec("delete from products where slug = 'real-tee'");
+
   await cleanDemo(seedDb);
   const left = await seedClient.query<{ n: number }>(
     "select (select count(*) from products) + (select count(*) from categories) as n",

@@ -25,8 +25,6 @@ jobs:
       - name: Migrations + demo seed against in-memory Postgres
         run: npm run db:check
       - run: npm run build
-        env:
-          NEXT_PUBLIC_SITE_URL: https://example.com
 
   images:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -49,9 +47,6 @@ jobs:
           context: .
           target: runner
           push: true
-          build-args: |
-            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL }}
-            NEXT_PUBLIC_MEDIA_URL=${{ vars.NEXT_PUBLIC_MEDIA_URL }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/quattro:latest
             ghcr.io/${{ github.repository_owner }}/quattro:${{ github.sha }}

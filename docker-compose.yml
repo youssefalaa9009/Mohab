@@ -1,5 +1,5 @@
-# Production stack for a single VPS: Postgres + migrations + Next.js + Caddy (automatic HTTPS).
-# Images are built in CI and pulled here — building Next.js on a small VPS is slow and memory-hungry.
+# Production stack for a single VPS: Postgres + migrations + the Node app + Caddy (automatic HTTPS).
+# Images are built in CI and pulled here — building on a small VPS is slow and memory-hungry.
 #
 #   docker compose pull && docker compose up -d
 #
@@ -27,6 +27,7 @@ services:
 
   migrate:
     image: ${QUATTRO_MIGRATOR_IMAGE:?set QUATTRO_MIGRATOR_IMAGE}
+    env_file: .env
     environment:
       DATABASE_URL: *database-url
     depends_on:
@@ -44,8 +45,19 @@ services:
       migrate:
         condition: service_completed_successfully
     volumes:
-      - nextcache:/app/.next/cache
+      # Product photos uploaded in the admin. Back this up with the database.
+      - uploads:/app/uploads
     stop_grace_period: 30s
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
 
   caddy:
     image: caddy:2-alpine
@@ -65,6 +77,6 @@ services:
 
 volumes:
   pgdata:
-  nextcache:
+  uploads:
   caddy_data:
   caddy_config:

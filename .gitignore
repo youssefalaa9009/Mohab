@@ -33,11 +33,30 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+!.env.production
 
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
 # local database (PGlite schema checks)
 /.pglite
+
+# build output
+/dist
+
+# review screenshots
+/review
+
+# local development database (npm run db:start)
+/.postgres
+
+# playwright
+/test-results
+/playwright-report
+
+# local logs and screenshots
+/.logs
+
+# uploaded product images (a Docker volume in production)
+/uploads
