@@ -1,6 +1,5 @@
 .git
 .github
-.next
 node_modules
 .env*
 !.env.example
@@ -9,3 +8,10 @@ node_modules
 Dockerfile
 docker-compose*.yml
 Caddyfile
+.postgres
+.logs
+uploads
+dist
+review
+test-results
+playwright-report

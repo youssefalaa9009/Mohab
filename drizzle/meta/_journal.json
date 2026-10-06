@@ -8,6 +8,41 @@
       "when": 1790782312842,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791047321915,
+      "tag": "0001_checkout",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791154373486,
+      "tag": "0002_enable_pg_trgm",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791154376661,
+      "tag": "0003_search_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791189948973,
+      "tag": "0004_store_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791306326317,
+      "tag": "0005_idempotency_keys",
+      "breakpoints": true
     }
   ]
 }

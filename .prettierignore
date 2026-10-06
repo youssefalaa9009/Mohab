@@ -2,3 +2,9 @@
 node_modules
 drizzle/meta
 package-lock.json
+.logs
+.postgres
+test-results
+playwright-report
+uploads
+scripts/example-media/CREDITS.md
